@@ -6,6 +6,8 @@
 #include "spinlock.h"
 #include "proc.h"
 
+#include "ptree.h"
+
 uint64
 sys_exit(void)
 {
@@ -90,4 +92,35 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+uint64
+sys_ptree(void)
+{
+  uint64 addr;
+  int max;
+  struct ptreeinfo *kbuf;
+  int count;
+
+  // SỬA LẠI THẾ NÀY: Gọi riêng từng hàm, không dùng phép so sánh trực tiếp
+  argaddr(0, &addr);
+  argint(1, &max);
+
+  if(max <= 0)
+    return -1;
+
+  kbuf = (struct ptreeinfo *)kalloc();
+  if(kbuf == 0)
+    return -1;
+
+  int fetch_max = max < NPROC ? max : NPROC;
+  count = fill_ptree(kbuf, fetch_max);
+
+  int copy_count = count < max ? count : max;
+  if(copyout(myproc()->pagetable, addr, (char *)kbuf, sizeof(struct ptreeinfo) * copy_count) < 0) {
+    kfree((char *)kbuf);
+    return -1;
+  }
+
+  kfree((char *)kbuf);
+  return count;
 }

@@ -36,3 +36,6 @@ entry("getpid");
 entry("sbrk");
 entry("sleep");
 entry("uptime");
+
+#Đăng ký stub cho system call ptree
+entry("ptree");

@@ -85,7 +85,10 @@ LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 
+#Cho Windows
 CFLAGS = -Wall -Werror -O -fno-omit-frame-pointer -ggdb -gdwarf-2
+#Cho macOS
+#CFLAGS = -Wall -O -fno-omit-frame-pointer -ggdb -gdwarf-2 -Wno-error=incompatible-pointer-types
 
 ifdef LAB
 LABUPPER = $(shell echo $(LAB) | tr a-z A-Z)
@@ -194,9 +197,7 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
-
-
-
+	$U/_pstree\
 
 ifeq ($(LAB),syscall)
 UPROGS += \

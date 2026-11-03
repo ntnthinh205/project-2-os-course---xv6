@@ -1,0 +1,63 @@
+
+#Chay lenh sau de cai dat brew
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+#Kiem tra brew version:
+brew --version
+
+#Cài đặt RISC-V Toolchain và QEMU:
+brew tap riscv/riscv
+brew trust riscv/riscv
+brew install riscv-gnu-toolchain qemu
+
+#tạo file kernal/ptree.h
+#thêm #define SYS_ptree  22  vào kernal/syscall.h
+#thêm [SYS_ptree]   sys_ptree,    vào kernal/syscall.c 
+#thêm #include "ptree.h" và hàm: int fill_ptree(struct ptreeinfo *buf, int max) vào kernal/proc.c 
+#thêm #include "ptree.h" và thêm hàm : uint64 sys_ptree(void) vào kernal/sysproc.c
+
+#tạo file user/pstree.c
+#thêm $U/_pstree\ vào UPROGS của Makefile
+
+#Thêm dòng khai báo ptree
+int ptree(void *buf, int max);  vào user/user.h
+#Đăng ký stub cho system call ptree
+entry("ptree");    vào file usys.pl
+
+#chay 
+*do co su khac biet giua may Mac va may Window, cu the: trong Makefile:
+    1. 
+    Window: TOOLPREFIX = riscv64-unknown-elf-
+    macOS: TOOLPREFIX = riscv64-elf-
+
+    nên lưu ý đổi lại khi chạy!
+
+    -> giải pháp tạm thời ( để không làm thay đổi Makefile ảnh hưởng đến người dùng Windows) thì dùng cách truyền tham số vào terminal:
+    echo 'alias make="make TOOLPREFIX=riscv64-elf-"' >> ~/.zshrc
+    source ~/.zshrc
+
+    2. *****Quan trong*****
+    với máy mac thì phải đổi cờ mới chạy đc: trong Makefile
+    #Cho Windows
+    #CFLAGS = -Wall -Werror -O -fno-omit-frame-pointer -ggdb -gdwarf-2
+    #Cho macOS
+    CFLAGS = -Wall -O -fno-omit-frame-pointer -ggdb -gdwarf-2 -Wno-error=incompatible-pointer-types
+    
+    3. Chay : 
+    make clear
+    make quemu
+
+    xv6 kernel is booting
+
+
+    ->Ket qua
+        hart 1 starting
+        hart 2 starting
+        init: starting sh
+        $ pstree
+        1 init state=2 mem=20480
+        2 sh state=2 mem=24576
+            3 pstree state=4 mem=20480
+        $ 
+
+#

@@ -6,6 +6,8 @@
 #include "proc.h"
 #include "defs.h"
 
+#include "ptree.h"
+
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
@@ -692,4 +694,28 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+int
+fill_ptree(struct ptreeinfo *buf, int max)
+{
+  struct proc *p;
+  int count = 0;
+  extern struct proc proc[NPROC];
+
+  for(p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
+    if(p->state != UNUSED) {
+      if(count < max) {
+        buf[count].pid = p->pid;
+        buf[count].ppid = p->parent ? p->parent->pid : 0;
+        buf[count].state = p->state;
+        buf[count].memsize = p->sz;
+        safestrcpy(buf[count].name, p->name, sizeof(buf[count].name));
+      }
+      count++;
+    }
+    release(&p->lock);
+  }
+  return count;
 }
