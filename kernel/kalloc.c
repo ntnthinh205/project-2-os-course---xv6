@@ -43,6 +43,22 @@ freerange(void *pa_start, void *pa_end)
 // which normally should have been returned by a
 // call to kalloc().  (The exception is when
 // initializing the allocator; see kinit above.)
+uint64
+count_free_mem(void)
+{
+  struct run *r;
+  uint64 free_bytes = 0;
+
+  acquire(&kmem.lock);
+  r = kmem.freelist;
+  while(r){
+    free_bytes += PGSIZE;
+    r = r->next;
+  }
+  release(&kmem.lock);
+  return free_bytes;
+}
+
 void
 kfree(void *pa)
 {
