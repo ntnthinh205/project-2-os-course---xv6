@@ -86,9 +86,9 @@ OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 
 #Cho Windows
-#CFLAGS = -Wall -Werror -O -fno-omit-frame-pointer -ggdb -gdwarf-2
+CFLAGS = -Wall -Werror -O -fno-omit-frame-pointer -ggdb -gdwarf-2
 #Cho macOS
-CFLAGS = -Wall -O -fno-omit-frame-pointer -ggdb -gdwarf-2 -Wno-error=incompatible-pointer-types
+#CFLAGS = -Wall -O -fno-omit-frame-pointer -ggdb -gdwarf-2 -Wno-error=incompatible-pointer-types
 
 ifdef LAB
 LABUPPER = $(shell echo $(LAB) | tr a-z A-Z)
