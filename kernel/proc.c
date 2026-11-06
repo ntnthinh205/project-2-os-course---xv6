@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "ptree.h"
 
 struct cpu cpus[NCPU];
 
@@ -713,3 +714,27 @@ count_proc(void)
   return count;
 }
 
+int
+fill_ptree(struct ptreeinfo *buf, int max)
+{
+  struct proc *p;
+  int count = 0;
+
+  for(p = proc; p < &proc[NPROC]; p++) {
+    acquire(&wait_lock);
+    acquire(&p->lock);
+    if(p->state != UNUSED) {
+      if(count < max) {
+        buf[count].pid = p->pid;
+        buf[count].ppid = p->parent ? p->parent->pid : 0;
+        buf[count].state = p->state;
+        buf[count].memsize = p->sz;
+        safestrcpy(buf[count].name, p->name, sizeof(buf[count].name));
+      }
+      count++;
+    }
+    release(&p->lock);
+    release(&wait_lock);
+  }
+  return count;
+}
